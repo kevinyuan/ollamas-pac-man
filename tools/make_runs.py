@@ -1,4 +1,4 @@
-"""Write web/runs.json: the list of recorded runs the replay tab offers.  python3 tools/make_runs.py
+"""Write web/runs.json: the list of recorded runs the Replay tab offers.  python3 tools/make_runs.py
 
 Each web/*.json log is replayed (same seed, same moves) to get its final score, so the numbers shown on the page
 are the engine's own. Seeds come from the file name (..._s3.json); game.json and game_nimble.json are seed 1.

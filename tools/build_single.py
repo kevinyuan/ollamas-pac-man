@@ -1,7 +1,7 @@
 """Bundle web/ into one self-contained HTML file (no server needed):  python3 tools/build_single.py [out.html]
 
-Inlines the stylesheet and every script and embeds a sample run (with requests) for the replay tab.
-Open the file directly, or serve it from anywhere; the live tab only needs an AI endpoint URL.
+Inlines the stylesheet and every script and embeds a sample run (with requests) for the Replay tab.
+Open the file directly, or serve it from anywhere; the Model plays tab only needs an AI endpoint URL.
 """
 import re
 import sys

@@ -1,4 +1,4 @@
-/* "Nimble live": the game runs here in the browser; every move is decided by an AI endpoint you provide
+/* "Model plays": the game runs here in the browser; every move is decided by an AI endpoint you provide
  * (Ollama's /v1/systemone). Nothing is sent anywhere else. Needs panels.js, board.js, game.js, prompts.js. */
 (function () {
   "use strict";

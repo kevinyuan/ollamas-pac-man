@@ -11,7 +11,7 @@
 
 **文章（发布在 Substack）：** [Reproducing Ollama's Pac-Man decision-model demo](https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision)
 
-![回放页：棋盘、发给模型的请求、模型的回答，逐步对应](docs/img/replay.gif)
+![三个标签：回放录好的对局、自己玩、让模型在你的 endpoint 上实时玩](docs/img/demo.gif)
 
 > **独立项目**，与 Ollama 无隶属关系，也未获其认可。迷宫布局和页面外观参照了文章里的演示；引擎、请求格式和全部代码都是新写的。
 > Pac-Man 是 Bandai Namco 的商标，本项目只是非官方的教学性克隆。
@@ -25,8 +25,8 @@ python3 -m http.server -d web 8765     # 打开 http://localhost:8765/
 python3 tools/build_single.py          # 或生成单文件 dist/pacman.html
 ```
 
-页面三个标签：**AI replay**（回放录好的对局，并排看每一步的请求和回答）、**Play yourself**（自己玩）、
-**Nimble live**（填入自己的 Ollama 地址，让模型实时玩，每一步的请求都能看到）。
+页面三个标签：**Replay**（回放录好的对局，并排看每一步的请求和回答）、**You play**（自己玩）、
+**Model plays**（填入自己的 Ollama 地址，让模型实时玩，每一步的请求都能看到）。
 
 实时模式需要 Ollama 0.35 或更新版本和决策模型（`ollama pull nimble`）。浏览器有跨域限制，Ollama 默认只接受
 `http://localhost` 页面；直接双击打开 html 文件或托管在别的域名时，需要设置 `OLLAMA_ORIGINS`

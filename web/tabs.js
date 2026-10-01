@@ -1,4 +1,4 @@
-/* Tab switching: AI replay / Play yourself / Nimble live. Other scripts listen for the "pactab" event to pause. */
+/* Tab switching: Replay / You play / Model plays. Other scripts listen for the "pactab" event to pause. */
 (function () {
   "use strict";
   var panels = { replay: document.querySelector("[data-pacman]"), play: document.querySelector("[data-play]"), live: document.querySelector("[data-live]") };

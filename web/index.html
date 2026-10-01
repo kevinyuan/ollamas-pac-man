@@ -23,9 +23,9 @@
     <p class="links"><a href="https://github.com/kevinyuan/ollamas-pac-man" target="_blank" rel="noopener">Source on GitHub</a><span aria-hidden="true">·</span><a href="https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision" target="_blank" rel="noopener">Write-up on Substack</a></p>
   </header>
   <div class="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="replay" aria-selected="true">AI replay</button>
-    <button type="button" role="tab" data-tab="play" aria-selected="false">Play yourself</button>
-    <button type="button" role="tab" data-tab="live" aria-selected="false">Nimble live</button>
+    <button type="button" role="tab" data-tab="replay" aria-selected="true">Replay</button>
+    <button type="button" role="tab" data-tab="play" aria-selected="false">You play</button>
+    <button type="button" role="tab" data-tab="live" aria-selected="false">Model plays</button>
   </div>
   <p class="lede" data-lede>A recorded game: at every move the agent answers one
   <code>choice</code> question through <code>/v1/systemone</code>, and the page replays that run.</p>
@@ -50,7 +50,7 @@
   <figure class="fig" data-play hidden>
     <div class="box game">
       <div class="game-grid">
-        <svg class="maze" data-play-maze viewBox="0 0 304 336" role="img" aria-label="Pac-Man, play yourself"></svg>
+        <svg class="maze" data-play-maze viewBox="0 0 304 336" role="img" aria-label="Pac-Man, played by you"></svg>
         <div>
           <div class="top"><span class="status" data-play-status>Press an arrow key to start</span><button type="button" class="btn" data-play-restart>Restart</button></div>
           <dl class="stats mono">

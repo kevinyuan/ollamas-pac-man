@@ -13,7 +13,7 @@ board changes how well the model plays.
 
 **Write-up (on Substack):** [Reproducing Ollama's Pac-Man decision-model demo](https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision)
 
-![The replay tab: the board, the request sent to the model and its response, one decision per move](docs/img/replay.gif)
+![The three tabs: a recorded run, playing it yourself, and a live model on your own endpoint](docs/img/demo.gif)
 
 > **Independent project.** Not affiliated with or endorsed by Ollama. The maze layout and the look of the page follow
 > the demo in the post; the engine, the request formats and all code here are new. Pac-Man is a trademark of
@@ -32,9 +32,9 @@ The page has three tabs:
 
 | Tab | What it does |
 |---|---|
-| **AI replay** | Replays recorded runs. Pick a run (grouped by how the board was described) and read, for every move, the **request** sent to the model beside the **response**. The option the model chose is highlighted. |
-| **Play yourself** | The same game with the keyboard (arrows / WASD) or touch. |
-| **Nimble live** | A model drives. Enter your own endpoint, model name and request format; each move is a live request you can read. |
+| **Replay** | Replays recorded runs. Pick a run (grouped by how the board was described) and read, for every move, the **request** sent to the model beside the **response**. The option the model chose is highlighted. |
+| **You play** | The same game with the keyboard (arrows / WASD) or touch. |
+| **Model plays** | A model drives. Enter your own endpoint, model name and request format; each move is a live request you can read. |
 
 ### Live mode
 
@@ -44,7 +44,7 @@ You need [Ollama](https://ollama.com) 0.35 or newer and a decision model:
 ollama pull nimble
 ```
 
-Open the **Nimble live** tab, keep `http://localhost:11434`, press *Test connection*, then *Start*.
+Open the **Model plays** tab, keep `http://localhost:11434`, press *Test connection*, then *Start*.
 
 Browsers enforce CORS, and Ollama only accepts pages served from `http://localhost` by default. If you open the
 single file straight from disk (the browser then sends `Origin: null`) or host the page on another domain, start

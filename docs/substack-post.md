@@ -34,7 +34,7 @@ Both options read the same here, and the probabilities came out at 0.53 and 0.47
 
 ## What I built
 
-The project has a small Pac-Man engine in Python, a JavaScript port that follows the same rules, and a breadth-first-search (BFS) player as a reference. A browser page has three tabs: it replays recorded runs with each request shown next to its response, it lets you play yourself, and it can drive the game with your own Ollama endpoint. The page is plain HTML and JavaScript, so nothing needs to be deployed. Every request is logged, and a finished game can be replayed deterministically, which let me work out why each life was lost.
+The project has a small Pac-Man engine in Python, a JavaScript port that follows the same rules, and a breadth-first-search (BFS) player as a reference. A browser page has three tabs: Replay shows recorded runs with each request next to its response, You play lets you play it yourself, and Model plays drives the game with your own Ollama endpoint. The page is plain HTML and JavaScript, so nothing needs to be deployed. Every request is logged, and a finished game can be replayed deterministically, which let me work out why each life was lost.
 
 I used `nimble`, the 9B decision model named in the post, through Ollama 0.35 on a MacBook Air. A decision takes about 1.2 s there instead of 91 ms. The post's figure comes from different hardware, and I cannot separate the hardware from anything else. The difference does not affect the results below, because the game is turn-based: the ghosts wait for the model, so a slow answer cannot cost a life.
 
@@ -100,6 +100,6 @@ Each model variant has three games (the rules have 20 or more), with one model, 
 
 ## Try it
 
-Everything runs in the browser. Clone [the repository](https://github.com/kevinyuan/ollamas-pac-man) (MIT), serve the `web/` folder, and open the Nimble live tab to drive the game with your own endpoint, or open the replay tab to read the requests. You need `ollama pull nimble`, and `OLLAMA_ORIGINS` must be set for any page that is not served from `localhost`; the page explains how. If you find a wording that does better than mine, I would like to see it.
+Everything runs in the browser. Clone [the repository](https://github.com/kevinyuan/ollamas-pac-man) (MIT), serve the `web/` folder, and open the Model plays tab to drive the game with your own endpoint, or open the Replay tab to read the requests. You need `ollama pull nimble`, and `OLLAMA_ORIGINS` must be set for any page that is not served from `localhost`; the page explains how. If you find a wording that does better than mine, I would like to see it.
 
 *Thanks to Ollama for the post this reproduces. This is an unaffiliated project, and Pac-Man is a trademark of Bandai Namco Entertainment.*
