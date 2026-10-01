@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reproducing Ollama&#x27;s Pac-Man decision-model demo (copy into Substack)</title>
+<style>
+:root{--line:#E7E5E0;--ink:#171717;--muted:#737373}
+*{box-sizing:border-box}
+body{margin:0;background:#FAFAF9;color:var(--ink);font:17px/1.7 Georgia,"Times New Roman",serif}
+.bar{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;font:14px/20px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar .row{max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar b{margin-right:4px}
+button{height:32px;padding:0 14px;border:1px solid var(--line);border-radius:9999px;background:#fff;color:var(--ink);font:500 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+button:hover{background:#F4F3F0}button.ok{background:#0b7a4b;border-color:#0b7a4b;color:#fff}
+.msg{color:var(--muted);font-size:13px}
+main{max-width:720px;margin:28px auto 80px;padding:0 16px}
+.field{margin:0 0 28px;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;background:#fff}
+.field small{display:block;margin-bottom:4px;color:var(--muted);font:12px/16px -apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.field h1{margin:0;font-size:30px;line-height:1.25}
+.field p{margin:0;color:#404040;font-style:italic}
+article{background:#fff;padding:8px 28px 24px;border:1px solid var(--line);border-radius:12px}
+article h2{margin:1.8em 0 .5em;font-size:24px;line-height:1.3}
+article img{display:block;max-width:100%;height:auto;margin:1.2em auto;border:1px solid var(--line)}
+article pre{overflow-x:auto;padding:12px 14px;background:#F4F3F0;border-radius:8px;font-size:14px;line-height:1.5}
+article code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+article :not(pre)>code{background:#F4F3F0;padding:1px 5px;border-radius:4px}
+article a{color:inherit}
+</style>
+</head>
+<body>
+<div class="bar"><div class="row">
+  <b>Copy into Substack:</b>
+  <button data-copy="title">1. Title</button>
+  <button data-copy="subtitle">2. Subtitle</button>
+  <button data-copy="body">3. Body</button>
+  <span class="msg" id="msg">Paste the body into the editor, then upload the image if it does not load.</span>
+</div></div>
+<main>
+  <div class="field" id="title"><small>Title</small><h1>Reproducing Ollama&#x27;s Pac-Man decision-model demo</h1></div>
+  <div class="field" id="subtitle"><small>Subtitle</small><p>The model itself was fast. Describing the game to it took most of the work, and adding one missing fact raised the mean score from 587 to 1,020.</p></div>
+  <article id="body">
+<p><img src="https://raw.githubusercontent.com/kevinyuan/ollamas-pac-man/main/docs/img/replay.png" alt="The replay page: the board, the request sent to the model, and its response, side by side" /></p>
+<p>Ollama's post <a href="https://ollama.com/blog/ollama-now-supports-jev-style-decision-models"><em>Ollama now supports Jev-style decision models</em></a> includes a small Pac-Man game that a local model plays one decision at a time, at 91 ms per decision. The post shows the game and the model's answers but not the request behind each answer, so I could not tell what the model was actually being asked. I rebuilt the game to find out how much that request matters. This is an independent reproduction and is not affiliated with Ollama. The code is at <a href="https://github.com/kevinyuan/ollamas-pac-man">kevinyuan/ollamas-pac-man</a>.</p>
+<h2 id="what-the-demo-asks-of-the-model">What the demo asks of the model</h2>
+<p>The new <code>/v1/systemone</code> endpoint takes a <code>state</code> (text) and a set of named questions, and returns one answer per question. In the Pac-Man demo each move is a single <code>choice</code> question over the legal directions. The answer contains the chosen option, a probability for every option, and a confidence value, and the game receives nothing else from the model.</p>
+<p>That leaves two strings to design: what goes into <code>state</code>, and what is written beside each option. Below is one of the requests I settled on, followed by the answer it received in a recorded run.</p>
+<pre class="json"><code>{
+  &quot;state&quot;: { &quot;game&quot;: &quot;Pac-Man&quot; },
+  &quot;questions&quot;: { &quot;move&quot;: {
+    &quot;type&quot;: &quot;choice&quot;,
+    &quot;instructions&quot;: &quot;Each option describes what you would find by moving that way. Pick the move that heads toward a dot, and never toward a close ghost or a ghost in a side passage. Which move do you pick?&quot;,
+    &quot;criteria&quot;: {
+      &quot;up&quot;:   &quot;Moving up: there is a dot ahead, no ghost is in sight, and the side passages are clear.&quot;,
+      &quot;down&quot;: &quot;Moving down: there is a dot ahead, no ghost is in sight, and the side passages are clear.&quot;
+    }
+  } }
+}</code></pre>
+<pre class="json"><code>{ &quot;answers&quot;: { &quot;move&quot;: { &quot;choice&quot;: &quot;up&quot;, &quot;probabilities&quot;: { &quot;up&quot;: 0.53, &quot;down&quot;: 0.47 }, &quot;confidence&quot;: 0.00 } } }</code></pre>
+<p>Both options read the same here, and the probabilities came out at 0.53 and 0.47. With nothing to separate the options, the model has no basis for a preference, so whatever distinguishes them has to be in the option text.</p>
+<h2 id="what-i-built">What I built</h2>
+<p>The project has a small Pac-Man engine in Python, a JavaScript port that follows the same rules, and a breadth-first-search (BFS) player as a reference. A browser page has three tabs: it replays recorded runs with each request shown next to its response, it lets you play yourself, and it can drive the game with your own Ollama endpoint. The page is plain HTML and JavaScript, so nothing needs to be deployed. Every request is logged, and a finished game can be replayed deterministically, which let me work out why each life was lost.</p>
+<p>I used <code>nimble</code>, the 9B decision model named in the post, through Ollama 0.35 on a MacBook Air. A decision takes about 1.2 s there instead of 91 ms. The post's figure comes from different hardware, and I cannot separate the hardware from anything else. The difference does not affect the results below, because the game is turn-based: the ghosts wait for the model, so a slow answer cannot cost a life.</p>
+<p>Scoring is +10 per dot and −50 per catch, with three lives. The game in the post comes to about 1,180 under these rules (133 of 150 dots and three catches). Its ghosts move differently from mine, so I treat that number as context and not as a target.</p>
+<h2 id="experiment-1-the-board-as-text">Experiment 1: the board as text</h2>
+<p>The most direct input is the maze itself, one character per cell, with a legend. With this input the model scored −80 in all three games. It ate 7 dots and then lost all three lives while moving left and right as the ghosts approached. Explaining how to read the grid (rows, directions, the goal) raised agreement with the BFS player slightly in an offline check on 60 positions, but it stayed close to chance, and raw coordinates did not do much better.</p>
+<p>A set of small controlled tasks showed where the difficulty lies. When the model is given one target in plain words ("the dot is 3 right and 2 up"), it picks the right direction 90 to 100% of the time. When it is given six dots and asked for the nearest, accuracy falls to 36–40% against a chance level of 32%, and listing the nearest dot first did not help. The model can use a fact that is stated to it, but it cannot pick one out of a list.</p>
+<h2 id="experiment-2-precomputed-facts-and-what-they-leak">Experiment 2: precomputed facts, and what they leak</h2>
+<p>I then moved the computation into the options by using BFS to write labels such as "nearest dot 6 steps" and <code>DEADLY: ghost adjacent</code>. These looked very good offline, with 80% agreement with the BFS player and almost no steps next to a ghost.</p>
+<p>To see how much of that came from the model, I wrote a rule with no model that reads the same labels: skip any <code>DEADLY</code> option, then take the smallest distance. Over 20 games the rule averaged 1,285 points against 1,384 for the BFS player, so the labels already contained the answer. The model, given the same labels, averaged 713 over three games. From then on I compared every variant with a plain rule that sees the same facts, because otherwise a good result could simply reflect a prompt that gives the answer away. The remaining experiments use facts that can be read directly off the board, such as what is straight ahead and what is beside the next cell, without any search.</p>
+<h2 id="experiment-3-the-same-facts-written-differently">Experiment 3: the same facts, written differently</h2>
+<p>With the facts fixed, I changed only the wording. Agreement with the BFS player on the same 60 positions was:</p>
+<ul>
+<li>word fragments such as <code>dot, no ghost</code>: 65%</li>
+<li>full sentences such as <code>Moving left: there is a dot ahead, and no ghost is in sight.</code>: 80%</li>
+<li>full sentences with an instruction that ends in a question: 83%</li>
+</ul>
+<p>The sentences added no information; they simply read better to the model. Ending the instruction with a real question ("Which move do you pick?") helped slightly, within the noise of this sample. Rewriting the instruction as an evaluation ("moving toward a ghost is bad") lowered agreement, so the content of the instruction mattered more than its final punctuation.</p>
+<p>Per-position agreement also turned out to predict whole games poorly: two variants with the same 83% scored 587 and 1,020 points over full games. After that I judged variants on whole games.</p>
+<h2 id="experiment-4-reading-the-failures">Experiment 4: reading the failures</h2>
+<p>I replayed every lost game and asked, for each lost life, whether a safe move had existed. A loss can be unavoidable, when every option was next to a ghost. It can be a blind spot, when the prompt showed no danger although there was one. It can also be a model error, when the prompt showed the danger and the model chose it anyway.</p>
+<p>All nine lost lives in the raw-grid runs were model errors. In the sentence version with a straight-line view, six of nine were blind spots: a ghost waiting in a side passage next to the cell the model moved into, which a straight-line view cannot show. The model had read its prompt correctly, and the prompt lacked the information. I added one fact to each option, namely whether a ghost is in a side passage next to that cell.</p>
+<p>Mean score over three games, by what the model is told:</p>
+<ul>
+<li>the whole board as characters: −80</li>
+<li>word fragments, straight-line view: 553</li>
+<li>sentences, straight-line view: 587</li>
+<li>sentences plus the side-passage fact: 1,020</li>
+<li>the same plus "this move heads toward the nearest dot": 937</li>
+<li>BFS-computed labels, which leak the answer: 713</li>
+<li>for reference, with no model: random 63, a rule on the sentence facts 1,172, the BFS player 1,384 (20 games each)</li>
+</ul>
+<p>Blind-spot losses dropped from six to zero, so the gain came from supplying the missing fact, and no rewording produced it.</p>
+<h2 id="what-remains">What remains</h2>
+<p>With the information complete, every remaining avoidable loss was the model's own choice. In the three games with the side-passage fact (without the nearest-dot hint), the model moved into a ghost it had been warned about six times, and in each case the same option also said that a dot lay ahead, so the dot seems to outweigh the warning. When a dangerous option was marked with an explicit <code>DEADLY</code> and mentioned no dot, the model never walked into it (0 of 228 opportunities), compared with 6 of 308 in the sentence version, where the warning could sit beside a dot. That label version also contained the BFS leak, so I read this as a lead and not as proof. The next experiment tests it directly: describe the dangerous option plainly and leave the dot out.</p>
+<h2 id="takeaways">Takeaways</h2>
+<ol type="1">
+<li>The model uses a stated fact well and finds a fact in a list badly, so the facts belong in the option text, written as sentences.</li>
+<li>Selecting the nearest of several candidates failed, so that step is better computed outside the model.</li>
+<li>A plain rule on the same facts is the baseline that shows whether the model or the prompt is responsible for a result. Here the rule matches or beats the model, so this is a study of how to describe a situation to a decision model. It does not show that a model plays Pac-Man better than a few lines of code.</li>
+<li>Whole-game results and a classification of each lost life were more informative than per-position agreement, which hid a twofold difference.</li>
+<li>A missing fact can look like a model failure, so it is worth checking that the information was present before blaming the model.</li>
+</ol>
+<h2 id="limits">Limits</h2>
+<p>Each model variant has three games (the rules have 20 or more), with one model, one maze, and ghost behavior I wrote myself. Since I tried only a few wordings, every number is a lower bound on what a better prompt could achieve. I also do not know what request the demo in the post used, so none of this describes how Ollama built it.</p>
+<h2 id="try-it">Try it</h2>
+<p>Everything runs in the browser. Clone <a href="https://github.com/kevinyuan/ollamas-pac-man">the repository</a> (MIT), serve the <code>web/</code> folder, and open the Nimble live tab to drive the game with your own endpoint, or open the replay tab to read the requests. You need <code>ollama pull nimble</code>, and <code>OLLAMA_ORIGINS</code> must be set for any page that is not served from <code>localhost</code>; the page explains how. If you find a wording that does better than mine, I would like to see it.</p>
+<p><em>Thanks to Ollama for the post this reproduces. This is an unaffiliated project, and Pac-Man is a trademark of Bandai Namco Entertainment.</em></p>
+
+  </article>
+</main>
+<script>
+(function () {
+  var msg = document.getElementById("msg");
+  function done(btn, text) { btn.classList.add("ok"); msg.textContent = text; setTimeout(function () { btn.classList.remove("ok"); }, 1500); }
+  function selectNode(node) { var r = document.createRange(); r.selectNodeContents(node); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var id = btn.getAttribute("data-copy"), node = document.getElementById(id);
+      if (id !== "body") {  // plain text for the single-line fields
+        var text = node.querySelector("h1,p").textContent.trim();
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { done(btn, "Copied the " + id + "."); },
+          function () { selectNode(node.querySelector("h1,p")); document.execCommand("copy"); done(btn, "Copied the " + id + "."); });
+        return;
+      }
+      var htmlText = node.innerHTML;  // rich text, so headings, links, lists and code blocks survive pasting
+      if (navigator.clipboard && window.ClipboardItem) {
+        navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([htmlText], { type: "text/html" }), "text/plain": new Blob([node.innerText], { type: "text/plain" }) })])
+          .then(function () { done(btn, "Copied the body as rich text."); }, function () { selectNode(node); document.execCommand("copy"); done(btn, "Copied the body."); });
+      } else { selectNode(node); document.execCommand("copy"); done(btn, "Copied the body."); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
