@@ -13,7 +13,7 @@ board changes how well the model plays.
 
 **Write-up (on Substack):** [Reproducing Ollama's Pac-Man decision-model demo](https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision)
 
-![Replay tab](docs/img/replay.png)
+![The replay tab: the board, the request sent to the model and its response, one decision per move](docs/img/replay.gif)
 
 > **Independent project.** Not affiliated with or endorsed by Ollama. The maze layout and the look of the page follow
 > the demo in the post; the engine, the request formats and all code here are new. Pac-Man is a trademark of

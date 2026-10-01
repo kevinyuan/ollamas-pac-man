@@ -11,7 +11,7 @@
 
 **文章（发布在 Substack）：** [Reproducing Ollama's Pac-Man decision-model demo](https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision)
 
-![回放页：棋盘、发给模型的请求、模型的回答并排显示](docs/img/replay.png)
+![回放页：棋盘、发给模型的请求、模型的回答，逐步对应](docs/img/replay.gif)
 
 > **独立项目**，与 Ollama 无隶属关系，也未获其认可。迷宫布局和页面外观参照了文章里的演示；引擎、请求格式和全部代码都是新写的。
 > Pac-Man 是 Bandai Namco 的商标，本项目只是非官方的教学性克隆。
