@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pac-Man, played by a decision model</title>
+<meta name="description" content="An open-source reproduction of the Pac-Man demo from Ollama's decision-model post: one typed question per move, answered by a local model. Replay runs, play it yourself, or connect your own endpoint.">
+<meta property="og:title" content="Pac-Man, played by a decision model">
+<meta property="og:description" content="Open-source reproduction of the Pac-Man decision-model demo. Everything runs in your browser; bring your own Ollama endpoint.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 16 L28.1 9 A14 14 0 1 0 28.1 23 Z' fill='%23DDAE4A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header class="hero">
+    <p class="eyebrow"><span class="dot"></span>Open-source reproduction</p>
+    <h1>Pac-Man, played by a decision model</h1>
+    <p class="sub">A small, readable reproduction of the demo in Ollama&rsquo;s post
+      <a href="https://ollama.com/blog/ollama-now-supports-jev-style-decision-models" target="_blank" rel="noopener">Ollama now supports Jev-style decision models</a>:
+      one typed question per move, answered by a local model. Watch recorded runs, play it yourself, or point the page at your own endpoint.</p>
+    <p class="links"><a href="https://github.com/kevinyuan/ollamas-pac-man" target="_blank" rel="noopener">Source on GitHub</a><span aria-hidden="true">·</span><a href="https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision" target="_blank" rel="noopener">Write-up on Substack</a></p>
+  </header>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="replay" aria-selected="true">AI replay</button>
+    <button type="button" role="tab" data-tab="play" aria-selected="false">Play yourself</button>
+    <button type="button" role="tab" data-tab="live" aria-selected="false">Nimble live</button>
+  </div>
+  <p class="lede" data-lede>A recorded game: at every move the agent answers one
+  <code>choice</code> question through <code>/v1/systemone</code>, and the page replays that run.</p>
+
+  <figure class="fig busy" data-pacman>
+    <div class="box game">
+      <div class="run-bar" data-run-bar hidden>
+        <label>Recorded run<select data-run></select></label>
+        <span class="chips" data-chips></span>
+      </div>
+      <div class="game-grid qa-grid">
+        <svg class="maze" data-maze viewBox="0 0 304 336" role="img" aria-label="Pac-Man replay"></svg>
+        <div class="top"><span class="status" data-move>Loading…</span><button type="button" class="btn" data-replay>Replay</button></div>
+        <section class="qbox"><h3>Request</h3><pre class="mono json q"><code data-query></code></pre></section>
+        <section class="abox"><h3>Response</h3><pre class="mono json"><code data-json></code></pre></section>
+      </div>
+    </div>
+    <figcaption class="note" data-note></figcaption>
+    <p class="load">Load another run: <input type="file" accept="application/json" data-file></p>
+  </figure>
+
+  <figure class="fig" data-play hidden>
+    <div class="box game">
+      <div class="game-grid">
+        <svg class="maze" data-play-maze viewBox="0 0 304 336" role="img" aria-label="Pac-Man, play yourself"></svg>
+        <div>
+          <div class="top"><span class="status" data-play-status>Press an arrow key to start</span><button type="button" class="btn" data-play-restart>Restart</button></div>
+          <dl class="stats mono">
+            <div><dt>Score</dt><dd data-score>0</dd></div>
+            <div><dt>Lives</dt><dd data-lives>♥ ♥ ♥</dd></div>
+            <div><dt>Dots left</dt><dd data-dots>150</dd></div>
+            <div><dt>Best</dt><dd data-best>0</dd></div>
+          </dl>
+          <p class="hint">Arrow keys or WASD to steer · Space to pause · Enter to restart. A dot is +10, a ghost catch is −50.</p>
+          <div class="dpad" aria-label="Direction buttons">
+            <button type="button" data-dir="up" aria-label="Up">▲</button>
+            <button type="button" data-dir="left" aria-label="Left">◀</button>
+            <button type="button" data-dir="down" aria-label="Down">▼</button>
+            <button type="button" data-dir="right" aria-label="Right">▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption class="note">Same maze and rules as the Python engine used for the AI runs.</figcaption>
+  </figure>
+
+  <figure class="fig" data-live hidden>
+    <div class="box settings">
+      <div class="live-settings">
+        <label>AI endpoint<input type="url" data-endpoint spellcheck="false" placeholder="http://localhost:11434" autocomplete="off"></label>
+        <label>Model<input type="text" data-model spellcheck="false" placeholder="nimble" autocomplete="off"></label>
+        <label>What the model is told<select data-format></select></label>
+      </div>
+      <p class="hint" data-format-note></p>
+      <div class="live-test"><button type="button" class="btn" data-test>Test connection</button><span class="test-result" data-test-result></span></div>
+      <details class="help"><summary>Connection help</summary>
+        <p>The page talks to the endpoint straight from your browser, so there is nothing to deploy. It needs an Ollama (0.35 or newer) with a decision model, e.g. <code>ollama pull nimble</code>.</p>
+        <p>Ollama accepts requests from <code>http://localhost</code> pages by default. If you open this file directly from disk (the browser then sends <code>Origin: null</code>) or host it on another domain, start Ollama with <code>OLLAMA_ORIGINS</code> set:</p>
+        <pre class="mono">OLLAMA_ORIGINS="*" ollama serve                         # one-off
+launchctl setenv OLLAMA_ORIGINS "*"                      # macOS app, then restart it
+Environment="OLLAMA_ORIGINS=*"                           # systemd unit, then restart</pre>
+        <p>A page served over https can only call an https endpoint (or localhost). The request body contains only the game state described on the right.</p>
+      </details>
+    </div>
+
+    <div class="box game">
+      <div class="game-grid qa-grid">
+        <svg class="maze" data-live-maze viewBox="0 0 304 336" role="img" aria-label="Pac-Man driven by a model"></svg>
+        <div class="top"><span class="status" data-live-status>Press Start.</span>
+          <span class="btns"><button type="button" class="btn" data-live-step>Step</button><button type="button" class="btn primary" data-live-start>Start</button><button type="button" class="btn" data-live-restart>Restart</button></span></div>
+        <section class="qbox"><h3>Request</h3><pre class="mono json q"><code data-live-query></code></pre></section>
+        <section class="abox"><h3>Response</h3><pre class="mono json"><code data-live-answer></code></pre></section>
+      </div>
+      <dl class="stats mono stats5">
+        <div><dt>Score</dt><dd data-live-score>0</dd></div>
+        <div><dt>Lives</dt><dd data-live-lives>♥ ♥ ♥</dd></div>
+        <div><dt>Dots left</dt><dd data-live-dots>150</dd></div>
+        <div><dt>Decisions</dt><dd data-live-decisions>0</dd></div>
+        <div><dt>Avg latency</dt><dd data-live-latency>–</dd></div>
+      </dl>
+    </div>
+    <figcaption class="note">The game waits for the model on every move, so a slow endpoint means a slow game. Same maze and rules as the Python engine.</figcaption>
+  </figure>
+  <footer class="foot">
+    <p>An independent reproduction of the Pac-Man demo in
+      <a href="https://ollama.com/blog/ollama-now-supports-jev-style-decision-models" target="_blank" rel="noopener">Ollama&rsquo;s post</a>.
+      The maze and the look follow that demo; the engine, the request formats and all the code here are new.</p>
+    <p>Source: <a href="https://github.com/kevinyuan/ollamas-pac-man" target="_blank" rel="noopener">github.com/kevinyuan/ollamas-pac-man</a> (MIT). Write-up on Substack: <a href="https://kevinyuan1.substack.com/p/reproducing-ollamas-pac-man-decision" target="_blank" rel="noopener">Reproducing Ollama's Pac-Man decision-model demo</a>.</p>
+    <p>Not affiliated with or endorsed by Ollama. Pac-Man is a trademark of Bandai Namco Entertainment; this is an unaffiliated educational clone.</p>
+  </footer>
+</main>
+<script src="panels.js"></script>
+<script src="board.js"></script>
+<script src="game.js"></script>
+<script src="prompts.js"></script>
+<script src="replay.js"></script>
+<script src="play.js"></script>
+<script src="live.js"></script>
+<script src="tabs.js"></script>
+</body>
+</html>
